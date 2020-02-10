@@ -14,7 +14,7 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.6.3",
     "@types/react-native-snap-carousel": "^3.7.4",
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "mobx": "^5.15.0",
     "react": "16.8.3",
     "react-native": "0.59.4",
