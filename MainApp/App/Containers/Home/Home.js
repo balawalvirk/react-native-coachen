@@ -7,7 +7,9 @@ import {
   Image,
   Switch,
   ScrollView,
-  Platform
+  Platform,
+  ActivityIndicator,
+  Alert
 } from "react-native";
 import colors from "../../Themes/Colors";
 import ApplicationStyles from "../../Themes/ApplicationStyles";
@@ -16,82 +18,21 @@ import Icon from "react-native-vector-icons/FontAwesome";
 import Accordion from "react-native-collapsible/Accordion";
 import * as Animatable from "react-native-animatable";
 import { fonts } from "../../Themes/Fonts";
+import { getAllCategories, getActiveSession } from "../../backend/user/Jobs";
+import { getSearchBy, getSearchByCat } from "../../backend/user/Jobs";
+import { TextInput } from "react-native-gesture-handler";
 
-const tagList = [
-  {
-    type: "Music",
-    color: colors.redHeader,
-    subColor: colors.darkText,
-    TintColor: colors.redHeader,
-    path: require("../../Images/Note.png")
-  },
-  {
-    type: "Dogs",
-    color: colors.blueHome,
-    subColor: colors.Green,
-    TintColor: colors.blueHome,
-    path: require("../../Images/DogPaw.png")
-  },
-  {
-    type: "Health",
-    color: colors.Green,
-    subColor: colors.snow,
-    TintColor: colors.Green,
-    path: require("../../Images/cross.png")
-  },
-  {
-    type: "Language",
-    color: colors.star,
-    subColor: colors.darkText,
-    TintColor: colors.star,
-    path: require("../../Images/Book.png")
-  },
-  {
-    type: "Life",
-    color: colors.lightRed,
-    subColor: colors.barBgColor,
-    TintColor: colors.lightRed,
-    path: require("../../Images/Fav.png")
-  },
-  {
-    type: "School",
-    color: colors.Blue,
-    subColor: colors.snow,
-    TintColor: colors.Blue,
-    path: require("../../Images/school.png")
-  },
-  {
-    type: "Gaming",
-    color: colors.darkGreen,
-    subColor: colors.lightPink,
-    TintColor: colors.darkGreen,
-    path: require("../../Images/gamepad.png")
-  },
-  {
-    type: "Beauty",
-    color: colors.tagPurple,
-    subColor: colors.lightPink,
-    TintColor: colors.tagPurple,
-    path: require("../../Images/beauty.png")
-  },
-  {
-    type: "Design",
-    color: colors.skyBlue,
-    subColor: colors.darkText,
-    TintColor: colors.skyBlue,
-    path: require("../../Images/Pen.png")
-  }
-];
-
-class Home extends Component {
+export default class Home extends Component {
   constructor(props) {
-    super(props);
+    super(props); 
     this.state = {
       //Collapsible
+      CategoryData: [],
       activeSections: [],
       collapsed: true,
       multipleSelect: true,
-      CONTENT: []
+      CONTENT: [],
+      sessionData:[],
     };
   }
 
@@ -137,7 +78,11 @@ class Home extends Component {
     };
   };
 
-  componentDidMount() {
+  async componentDidMount() {
+    let categoryData = await getAllCategories();
+    let sessionData = await getActiveSession();
+
+    console.log("sessionData", sessionData);
     this.setState({
       CONTENT: [
         {
@@ -223,10 +168,26 @@ class Home extends Component {
             </View>
           )
         }
-      ]
+      ],
+      CategoryData: categoryData,
+      text: '',
+
     });
+    // console.log(this.state.CategoryData);
   }
 
+  search = async name => {
+    console.log("name", name);
+    //let getSearch = await getSearchByCat("Hip hop");
+    let getSearch = await getSearchBy(name);
+    if (getSearch) {
+      this.props.navigation.navigate("SearchByNames", {
+        item: getSearch
+      });
+    }
+    // console.log("Testing1",getSearch);
+    // console.log("Testing",getSearch1);
+  };
   toggleExpanded = () => {
     //alert("called");
     this.setState({ collapsed: !this.state.collapsed });
@@ -249,7 +210,7 @@ class Home extends Component {
           transition="backgroundColor"
         >
           <View>
-            <View
+            {/* <View
               style={{
                 flex: 1,
                 flexDirection: "row",
@@ -271,35 +232,47 @@ class Home extends Component {
                   backgroundColor: colors.snow
                 }}
               />
-            </View>
+            </View> */}
 
             <View
               style={{
                 backgroundColor: colors.snow,
                 // marginHorizontal: totalSize(2),
                 width: "100%",
-                height: totalSize(10),
-                borderTopLeftRadius: totalSize(4),
+                height: totalSize(12),
+                // borderTopLeftRadius: totalSize(4),
                 justifyContent: "center",
-                borderBottomLeftRadius: totalSize(4),
-                borderBottomRightRadius: totalSize(4)
+                borderBottomLeftRadius: totalSize(4)
+                // borderBottomRightRadius: totalSize(4)
               }}
             >
-              <Text
-                style={[
-                  Platform.OS == "ios"
-                    ? ApplicationStyles.h5
-                    : ApplicationStyles.h45,
-                  {
-                    fontWeight: "normal",
-                    color: colors.darkPurple,
-                    marginLeft: totalSize(3),
-                    fontFamily: fonts.poppinsRegular
-                  }
-                ]}
+              <View
+                style={{
+                  backgroundColor: colors.redHeader,
+                  width: width(16),
+                  marginLeft: totalSize(4),
+                  marginHorizontal: totalSize(1),
+                  marginVertical: totalSize(0.35),
+                  borderRadius: totalSize(5),
+                  justifyContent: "center",
+                  alignItems: "center"
+                }}
               >
-                Music
-              </Text>
+                <Text
+                  style={[
+                    ApplicationStyles.h45,
+                    {
+                      fontWeight: "normal",
+                      color: colors.snow,
+                      marginVertical: totalSize(0.2),
+                      // marginLeft: totalSize(4),
+                      fontFamily: fonts.poppinsLight
+                    }
+                  ]}
+                >
+                  Music
+                </Text>
+              </View>
               <Text
                 style={[
                   Platform.OS == "ios"
@@ -327,7 +300,7 @@ class Home extends Component {
           transition="backgroundColor"
         >
           <View>
-            <View
+            {/* <View
               style={{
                 flex: 1,
                 flexDirection: "row",
@@ -349,33 +322,47 @@ class Home extends Component {
                   backgroundColor: colors.snow
                 }}
               />
-            </View>
+            </View> */}
 
             <View
               style={{
                 backgroundColor: colors.snow,
                 // marginHorizontal: totalSize(2),
                 width: "100%",
-                height: totalSize(10),
-                borderTopLeftRadius: totalSize(4),
+                height: totalSize(12),
+                // borderTopLeftRadius: totalSize(4),
                 justifyContent: "center",
                 borderBottomLeftRadius: totalSize(4),
                 borderBottomRightRadius: totalSize(4)
               }}
             >
-              <Text
-                style={[
-                  ApplicationStyles.h45,
-                  {
-                    fontWeight: "normal",
-                    color: colors.darkPurple,
-                    marginLeft: totalSize(4),
-                    fontFamily: fonts.poppinsLight
-                  }
-                ]}
+              <View
+                style={{
+                  backgroundColor: colors.redHeader,
+                  width: width(16),
+                  marginLeft: totalSize(4),
+                  marginHorizontal: totalSize(1),
+                  marginVertical: totalSize(0.35),
+                  borderRadius: totalSize(5),
+                  justifyContent: "center",
+                  alignItems: "center"
+                }}
               >
-                Music
-              </Text>
+                <Text
+                  style={[
+                    ApplicationStyles.h45,
+                    {
+                      fontWeight: "normal",
+                      color: colors.snow,
+                      marginVertical: totalSize(0.2),
+                      // marginLeft: totalSize(4),
+                      fontFamily: fonts.poppinsLight
+                    }
+                  ]}
+                >
+                  Music
+                </Text>
+              </View>
               <Text
                 style={[
                   ApplicationStyles.h375,
@@ -552,21 +539,23 @@ class Home extends Component {
                   flexDirection: "row"
                 }}
               >
-                <Image
-                  source={require("../../Images/search.png")}
-                  style={[
-                    {
-                      width: totalSize(2.2),
-                      height: totalSize(2.2),
-                      // resizeMode: "center",
-                      marginLeft: totalSize(1.5),
-                      marginRight: totalSize(1.4),
-                      tintColor: colors.Purple
-                    }
-                  ]}
-                  tintColor={colors.Purple}
-                />
-                <Text
+                <TouchableOpacity onPress={() => this.search(this.state.text)}>
+                  <Image
+                    source={require("../../Images/search.png")}
+                    style={[
+                      {
+                        width: totalSize(2.2),
+                        height: totalSize(2.2),
+                        // resizeMode: "center",
+                        marginLeft: totalSize(1.5),
+                        marginRight: totalSize(1.4),
+                        tintColor: colors.Purple
+                      }
+                    ]}
+                    tintColor={colors.Purple}
+                  />
+                </TouchableOpacity>
+                <TextInput
                   style={[
                     Platform.OS == "ios"
                       ? ApplicationStyles.h425
@@ -574,12 +563,16 @@ class Home extends Component {
                     {
                       fontWeight: "normal",
                       fontFamily: fonts.poppinsLight,
-                      color: colors.Purple
+                      color: colors.Purple,
+                      padding: 5,
+                      width: width(85)
                     }
                   ]}
-                >
-                  Search
-                </Text>
+                  onChangeText={text => {
+                    this.setState({ text: text });
+                  }}
+                  placeholder={"Search"}
+                ></TextInput>
               </View>
 
               <View style={{ width: width(90), alignSelf: "center" }}>
@@ -604,8 +597,8 @@ class Home extends Component {
                       justifyContent: "center",
                       alignItems: "center",
                       borderTopRightRadius: totalSize(5),
-                      borderTopLeftRadius: totalSize(5),
-                      borderBottomRightRadius: totalSize(5)
+                      borderTopLeftRadius: totalSize(5)
+                      // borderBottomRightRadius: totalSize(5)
                     }}
                   >
                     <Icon name={"image"} color={colors.snow} size={50} />
@@ -654,17 +647,133 @@ class Home extends Component {
                       width: width(90),
                       alignSelf: "center",
                       paddingHorizontal: totalSize(2),
-                      paddingBottom: totalSize(2.5),
+                      paddingVertical: totalSize(2),
                       alignItems: "center",
                       backgroundColor: colors.snow,
-                      borderBottomLeftRadius: totalSize(4),
-                      borderTopLeftRadius: totalSize(4),
-                      borderTopRightRadius: totalSize(4)
+                      borderRadius: totalSize(4)
+                      // borderBottomLeftRadius: totalSize(4),
+                      // borderTopLeftRadius: totalSize(4),
+                      // borderTopRightRadius: totalSize(4)
                     }
                   ]}
                   onPress={() => this.props.navigation.navigate("music")}
                 >
-                  <View
+                  <View style={{ flex: 1 }}>
+                    <View
+                      style={[
+                        ApplicationStyles.row,
+                        { alignItems: "center", marginTop: totalSize(1) }
+                      ]}
+                    >
+                      <Image
+                        source={require("../../Images/dummy_profile_pic.jpg")}
+                        style={[
+                          Platform.OS == "ios"
+                            ? ApplicationStyles.profilepictureStyleIos
+                            : ApplicationStyles.profilepictureStyle,
+                          { marginRight: totalSize(0.5) }
+                        ]}
+                      />
+                      <View>
+                        <View style={[ApplicationStyles.row]}>
+                          <View>
+                            <View
+                              style={[
+                                ApplicationStyles.row,
+                                { alignItems: "center" }
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  Platform.OS == "ios"
+                                    ? ApplicationStyles.profileNameIos
+                                    : ApplicationStyles.profileName,
+                                  {
+                                    fontWeight: "normal",
+                                    color: colors.darkPurple,
+                                    marginHorizontal: totalSize(1),
+                                    fontFamily: fonts.futuraMedium
+                                  }
+                                ]}
+                              >
+                                Mille Knudsen
+                              </Text>
+
+                              <Icon
+                                name={"star"}
+                                color={colors.star}
+                                size={22}
+                              />
+                              <Text
+                                style={[
+                                  Platform.OS == "ios"
+                                    ? ApplicationStyles.h45
+                                    : ApplicationStyles.h4,
+                                  {
+                                    fontWeight: "normal",
+                                    color: colors.star,
+                                    marginLeft: totalSize(0.5)
+                                  }
+                                ]}
+                              >
+                                4.5
+                              </Text>
+
+                              <Icon
+                                name={"heart"}
+                                color={colors.redHeader}
+                                size={22}
+                                style={{
+                                  alignSelf: "flex-end",
+                                  marginLeft: totalSize(5)
+                                }}
+                              />
+                            </View>
+                            <Text
+                              style={[
+                                ApplicationStyles.h5,
+                                {
+                                  fontWeight: "normal",
+                                  color: colors.darkPurple,
+                                  marginHorizontal: totalSize(1)
+                                  //marginVertical: totalSize(3)
+                                }
+                              ]}
+                            >
+                              Vocal Coach
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View
+                          style={{
+                            backgroundColor: colors.redHeader,
+                            width: width(15),
+                            marginHorizontal: totalSize(1),
+                            marginVertical: totalSize(0.35),
+                            borderRadius: totalSize(5),
+                            justifyContent: "center",
+                            alignItems: "center"
+                          }}
+                        >
+                          <Text
+                            style={[
+                              ApplicationStyles.h5,
+                              {
+                                fontWeight: "normal",
+                                color: colors.snow,
+                                marginVertical: totalSize(0.15),
+                                marginHorizontal: totalSize(1)
+                              }
+                            ]}
+                          >
+                            Music
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                  {/* <View
                     style={[ApplicationStyles.row, { alignItems: "center" }]}
                   >
                     <Image
@@ -711,7 +820,7 @@ class Home extends Component {
                         typesetting industry. active in the field for 30 years.
                       </Text>
                     </View>
-                  </View>
+                  </View> */}
                 </TouchableOpacity>
               </View>
 
@@ -742,7 +851,113 @@ class Home extends Component {
                       { paddingHorizontal: totalSize(2) }
                     ]}
                   >
-                    <TouchableOpacity
+                    {this.state.sessionData.length > 0 &&
+                    this.state.sessionData ? (
+                      this.state.sessionData.map((item, key) => {
+                        return (
+                          <TouchableOpacity
+                            onPress={() =>
+                              this.props.navigation.navigate("Categorys")
+                            }
+                            style={[
+                              Platform.OS == "ios"
+                                ? ApplicationStyles.homeCardStyleIOS
+                                : ApplicationStyles.homeCardStyleAndroid,
+                              {
+                                backgroundColor: colors.blueHome
+                              }
+                            ]}
+                          >
+                            <View
+                              style={[
+                                Platform.OS == "ios"
+                                  ? ApplicationStyles.homeSubCardIOS
+                                  : ApplicationStyles.homeSubCardAndroid,
+                                {
+                                  backgroundColor: colors.Green
+                                }
+                              ]}
+                            >
+                              <Image
+                                source={{uri: item.image}}
+                                style={[
+                                  Platform.OS == "ios"
+                                    ? styles.cardIconStyleIOS
+                                    : styles.cardIconStyleAndroid,
+                                  {
+                                    tintColor: colors.Purple
+                                  }
+                                ]}
+                                tintColor={colors.Purple}
+                              />
+                            </View>
+                            <Text
+                              style={[
+                                ApplicationStyles.h375,
+                                {
+                                  fontWeight: "normal",
+                                  marginLeft: totalSize(2),
+                                  color: colors.Green,
+                                  fontFamily: fonts.futuraMedium
+                                }
+                              ]}
+                            >
+                              {item.lesson.title}
+                            </Text>
+                            <Text
+                              style={[
+                                Platform.OS == "ios"
+                                  ? ApplicationStyles.h5
+                                  : ApplicationStyles.h45,
+                                {
+                                  fontWeight: "normal",
+                                  marginLeft: totalSize(2),
+                                  marginTop: totalSize(1.5),
+                                  color: colors.Green,
+                                  fontFamily: fonts.futuraMedium
+                                }
+                              ]}
+                            >
+                              {item.session.length} sessions made
+                            </Text>
+                            <View
+                              style={[
+                                styles.barBg,
+                                {
+                                  backgroundColor: colors.blurBarBg
+                                }
+                              ]}
+                            >
+                              <View
+                                style={[
+                                  styles.barFill,
+                                  {
+                                    backgroundColor: colors.Green
+                                  }
+                                ]}
+                              />
+                            </View>
+                          </TouchableOpacity>
+                        );
+                      })
+                    ) : (
+                      <Text
+                        style={[
+                          Platform.OS == "ios"
+                            ? ApplicationStyles.h4
+                            : ApplicationStyles.h35,
+                          {
+                            fontWeight: "normal",
+                            color: colors.darkText,
+                            marginVertical: totalSize(3),
+                            fontFamily: fonts.futuraMedium
+                          }
+                        ]}
+                      >
+                        No session Found
+                      </Text>
+                    )}
+                    {/* <TouchableOpacity
                       onPress={() =>
                         this.props.navigation.navigate("Categorys")
                       }
@@ -940,7 +1155,6 @@ class Home extends Component {
                               : styles.cardIconStyleAndroid,
                             {
                               tintColor: colors.darkGreen
-                              // marginRight: totalSize(3)
                             }
                           ]}
                           tintColor={colors.darkGreen}
@@ -992,7 +1206,7 @@ class Home extends Component {
                           ]}
                         />
                       </View>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                   </View>
                 </ScrollView>
               </View>
@@ -1020,102 +1234,102 @@ class Home extends Component {
                   width: width(100),
                   flexDirection: "row",
                   flexWrap: "wrap",
-                  // borderRadius: totalSize(5),
                   paddingVertical: totalSize(3),
                   justifyContent: "space-evenly"
                 }}
               >
-                {tagList.map((item, key) => {
-                  return (
-                    <TouchableOpacity
-                      style={{
-                        alignItems: "center",
-                        //justifyContent: "space-evenly",
-                        marginVertical: totalSize(1.2)
-                      }}
-                      key={key}
-                      onPress={() =>
-                        this.props.navigation.navigate("Categorys")
-                      }
-                    >
-                      <View
+                {this.state.CategoryData.length > 0 ? (
+                  this.state.CategoryData.map((item, key) => {
+                    return (
+                      <TouchableOpacity
                         style={{
-                          backgroundColor: item.color,
-                          height:
-                            Platform.OS == "ios" ? totalSize(9) : totalSize(11),
-                          width:
-                            Platform.OS == "ios" ? totalSize(9) : totalSize(11),
-                          marginHorizontal: totalSize(1.5),
-                          //marginVertical: totalSize(1.5),
-                          //borderRadius: totalSize(2),
-                          borderTopLeftRadius: totalSize(2),
-                          borderTopRightRadius: totalSize(2),
-                          borderBottomLeftRadius: totalSize(2),
-                          justifyContent: "center"
+                          alignItems: "center",
+                          marginVertical: totalSize(1.2)
                         }}
+                        key={key}
+                        onPress={() =>
+                          this.props.navigation.navigate("Categorys", { item })
+                        }
                       >
                         <View
                           style={{
-                            backgroundColor: item.subColor,
-                            justifyContent: "center",
-                            alignItems: "center",
+                            backgroundColor:item.color,
                             height:
                               Platform.OS == "ios"
-                                ? totalSize(6)
-                                : totalSize(8),
+                                ? totalSize(9)
+                                : totalSize(11),
                             width:
                               Platform.OS == "ios"
-                                ? totalSize(6)
-                                : totalSize(8),
+                                ? totalSize(9)
+                                : totalSize(11),
                             marginHorizontal: totalSize(1.5),
-                            //marginVertical: totalSize(1.5),
-                            borderRadius:
-                              Platform.OS == "ios"
-                                ? totalSize(6) / 2
-                                : totalSize(8) / 2
+                            borderTopLeftRadius: totalSize(2),
+                            borderTopRightRadius: totalSize(2),
+                            borderBottomLeftRadius: totalSize(2),
+                            justifyContent: "center"
                           }}
                         >
-                          <Image
-                            source={item.path}
-                            style={[
-                              {
-                                width:
-                                  Platform.OS == "ios"
-                                    ? totalSize(4)
-                                    : totalSize(5),
-                                height:
-                                  Platform.OS == "ios"
-                                    ? totalSize(4)
-                                    : totalSize(5),
-                                // resizeMode: "contain",
-                                tintColor: item.TintColor
-                                // marginRight: totalSize(3)
-                              }
-                            ]}
-                            tintColor={item.TintColor}
-                          />
+                          <View
+                            style={{
+                              backgroundColor: item.subColor,
+                              justifyContent: "center",
+                              alignItems: "center",
+                              height:
+                                Platform.OS == "ios"
+                                  ? totalSize(6)
+                                  : totalSize(8),
+                              width:
+                                Platform.OS == "ios"
+                                  ? totalSize(6)
+                                  : totalSize(8),
+                              marginHorizontal: totalSize(1.5),
+                              borderRadius:
+                                Platform.OS == "ios"
+                                  ? totalSize(6) / 2
+                                  : totalSize(8) / 2
+                            }}
+                          >
+                            <Image
+                              source={{ uri: item.image }}
+                              style={[
+                                {
+                                  width:
+                                    Platform.OS == "ios"
+                                      ? totalSize(4)
+                                      : totalSize(5),
+                                  height:
+                                    Platform.OS == "ios"
+                                      ? totalSize(4)
+                                      : totalSize(5)
+                                  // tintColor: item.TintColor
+                                }
+                              ]}
+                              // tintColor={item.TintColor}
+                            />
+                          </View>
                         </View>
-                      </View>
-                      <Text
-                        style={[
-                          Platform.OS == "ios"
-                            ? ApplicationStyles.h45
-                            : ApplicationStyles.h4,
-                          {
-                            fontWeight: "normal",
-                            color: colors.darkText,
-                            marginVertical: totalSize(0.15),
-                            marginHorizontal: totalSize(1.3),
-                            fontFamily: fonts.poppinsRegular
-                          }
-                        ]}
-                      >
-                        {item.type}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-                {/* </View> */}
+                        <Text
+                          style={[
+                            Platform.OS == "ios"
+                              ? ApplicationStyles.h45
+                              : ApplicationStyles.h4,
+                            {
+                              fontWeight: "normal",
+                              color: colors.darkText,
+                              marginVertical: totalSize(0.15),
+                              marginHorizontal: totalSize(1.3),
+                              fontFamily: fonts.poppinsRegular
+                            }
+                          ]}
+                        >
+                          {item.name}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })
+                ) : (
+                  <ActivityIndicator size={"large"} />
+                )}
               </View>
             </View>
           </ScrollView>
@@ -1328,4 +1542,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Home;
+//export default Home;

@@ -6,13 +6,15 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Platform
+  Platform,
+  ActivityIndicator
 } from "react-native";
 import colors from "../../Themes/Colors";
 import ApplicationStyles from "../../Themes/ApplicationStyles";
 import { totalSize, height, width } from "react-native-dimension";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { fonts } from "../../Themes/Fonts";
+import { getTypes, getFavCoaches } from "../../backend/user/Jobs";
 
 const profileList = [
   {
@@ -68,7 +70,10 @@ const profileList = [
 class Favourites extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      loading: false,
+      TypeData: []
+    };
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -129,10 +134,21 @@ class Favourites extends Component {
     };
   };
 
+  async componentDidMount() {
+    let typeData = await getFavCoaches();
+    // let previousData = await this.props.navigation.getParam("item");
+    console.log("FAVvvvv",typeData);
+    this.setState({
+      TypeData: typeData
+    });
+  }
+
   render() {
     return (
       <View style={[styles.container, { backgroundColor: colors.Red }]}>
-        <ScrollView style={[styles.container, { backgroundColor: colors.Red }]}>
+        <ScrollView
+          style={[styles.container, { backgroundColor: colors.homeBgColor }]}
+        >
           <View
             style={{
               backgroundColor: colors.homeBgColor,
@@ -149,8 +165,6 @@ class Favourites extends Component {
                 paddingTop: totalSize(3),
                 paddingBottom: totalSize(15),
                 marginTop: totalSize(1),
-                // marginBottom: totalSize(15),
-                //paddingLeft: totalSize(2.5),
                 backgroundColor: colors.homeBgColor,
                 borderTopLeftRadius: totalSize(5),
                 borderTopRightRadius: totalSize(5)
@@ -163,140 +177,153 @@ class Favourites extends Component {
                 alignItems: "center"
               }}
             >
-              {profileList.map((item, key) => {
-                return (
-                  <View
-                    key={key}
-                    style={[
-                      ApplicationStyles.row,
-                      {
-                        width: width(90),
-                        backgroundColor: colors.snow,
-                        padding: totalSize(2),
-                        marginHorizontal: totalSize(2),
-                        marginVertical: totalSize(0.4),
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        borderRadius: totalSize(3)
-                      }
-                    ]}
-                    //onPress={() => this.props.navigation.navigate("Details")}
-                  >
+              {this.state.TypeData.length > 0 && this.state.TypeData ? (
+                this.state.TypeData.map((item, key) => {
+                  return (
                     <View
-                      style={[ApplicationStyles.row, { alignItems: "center" }]}
+                      key={key}
+                      style={[
+                        ApplicationStyles.row,
+                        {
+                          width: width(90),
+                          backgroundColor: colors.snow,
+                          padding: totalSize(2),
+                          marginHorizontal: totalSize(2),
+                          marginVertical: totalSize(0.4),
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          borderRadius: totalSize(3)
+                        }
+                      ]}
+                      //onPress={() => this.props.navigation.navigate("Details")}
                     >
-                      <Image
-                        source={require("../../Images/dummy_profile_pic.jpg")}
+                      <View
                         style={[
-                          Platform.OS == "ios"
-                            ? ApplicationStyles.profilepictureStyleIos
-                            : ApplicationStyles.profilepictureStyle,
-                          { marginRight: totalSize(1) }
+                          ApplicationStyles.row,
+                          { alignItems: "center" }
                         ]}
-                      />
-                      <View>
-                        <View style={[ApplicationStyles.row]}>
-                          <View>
-                            <Text
-                              style={[
-                                Platform.OS == "ios"
-                                  ? ApplicationStyles.profileNameIos
-                                  : ApplicationStyles.profileName,
-                                {
-                                  // fontWeight: "bold",
-                                  color: colors.darkPurple,
-                                  marginHorizontal: totalSize(1),
-                                  fontFamily: fonts.futuraMedium
-                                }
-                              ]}
-                            >
-                              {item.type}
-                            </Text>
-                            <Text
-                              style={[
-                                Platform.OS == "ios"
-                                  ? ApplicationStyles.h5
-                                  : ApplicationStyles.h4,
-                                {
-                                  fontWeight: "normal",
-                                  color: colors.darkPurple,
-                                  marginHorizontal: totalSize(1)
-                                  //marginVertical: totalSize(3)
-                                }
-                              ]}
-                            >
-                              {item.genere}
-                            </Text>
-
-                            <View
-                              style={{
-                                backgroundColor: item.color,
-                                width: width(15),
-                                justifyContent: "center",
-                                alignItems: "center",
-                                marginHorizontal: totalSize(1),
-                                marginVertical: totalSize(0.35),
-                                borderRadius: totalSize(5)
-                              }}
-                              // key={key}
-                            >
+                      >
+                        <Image
+                          // source={require("../../Images/dummy_profile_pic.jpg")}
+                          source={{ uri: item.image }}
+                          style={[
+                            Platform.OS == "ios"
+                              ? ApplicationStyles.profilepictureStyleIos
+                              : ApplicationStyles.profilepictureStyle,
+                            { marginRight: totalSize(1) }
+                          ]}
+                        />
+                        <View>
+                          <View style={[ApplicationStyles.row]}>
+                            <View>
+                              <Text
+                                style={[
+                                  Platform.OS == "ios"
+                                    ? ApplicationStyles.profileNameIos
+                                    : ApplicationStyles.profileName,
+                                  {
+                                    // fontWeight: "bold",
+                                    color: colors.darkPurple,
+                                    marginHorizontal: totalSize(1),
+                                    fontFamily: fonts.futuraMedium
+                                  }
+                                ]}
+                              >
+                                {item.name}
+                              </Text>
                               <Text
                                 style={[
                                   Platform.OS == "ios"
                                     ? ApplicationStyles.h5
-                                    : ApplicationStyles.h45,
+                                    : ApplicationStyles.h4,
                                   {
                                     fontWeight: "normal",
-                                    color: colors.snow,
-                                    marginVertical: totalSize(0.2)
-                                    // marginHorizontal: totalSize(1.3)
+                                    color: colors.darkPurple,
+                                    marginHorizontal: totalSize(1)
+                                    //marginVertical: totalSize(3)
                                   }
                                 ]}
                               >
-                                Music
+                                {item.type.name}
+                              </Text>
+
+                              <View
+                                style={{
+                                  backgroundColor: item.color,
+                                  width: width(15),
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  marginHorizontal: totalSize(1),
+                                  marginVertical: totalSize(0.35),
+                                  borderRadius: totalSize(5)
+                                }}
+                                // key={key}
+                              >
+                                <Text
+                                  style={[
+                                    Platform.OS == "ios"
+                                      ? ApplicationStyles.h5
+                                      : ApplicationStyles.h45,
+                                    {
+                                      fontWeight: "normal",
+                                      color: colors.snow,
+                                      marginVertical: totalSize(0.2)
+                                      // marginHorizontal: totalSize(1.3)
+                                    }
+                                  ]}
+                                >
+                                  {item.category.name}
+                                </Text>
+                              </View>
+                            </View>
+
+                            <View
+                              style={[
+                                ApplicationStyles.row,
+                                { justifyContent: "center" }
+                              ]}
+                            >
+                              <Icon
+                                name={"star"}
+                                color={colors.star}
+                                size={22}
+                              />
+                              <Text
+                                style={[
+                                  Platform.OS == "ios"
+                                    ? ApplicationStyles.h45
+                                    : ApplicationStyles.h375,
+                                  {
+                                    fontWeight: "normal",
+                                    color: colors.star,
+                                    marginHorizontal: totalSize(0.5)
+                                  }
+                                ]}
+                              >
+                                4.5
                               </Text>
                             </View>
                           </View>
-
-                          <View
-                            style={[
-                              ApplicationStyles.row,
-                              { justifyContent: "center" }
-                            ]}
-                          >
-                            <Icon name={"star"} color={colors.star} size={22} />
-                            <Text
-                              style={[
-                                Platform.OS == "ios"
-                                  ? ApplicationStyles.h45
-                                  : ApplicationStyles.h375,
-                                {
-                                  fontWeight: "normal",
-                                  color: colors.star,
-                                  marginHorizontal: totalSize(0.5)
-                                }
-                              ]}
-                            >
-                              {item.rating}
-                            </Text>
-                          </View>
                         </View>
                       </View>
+                      <TouchableOpacity>          
+                      <Icon
+                        name={"heart"}
+                        color={colors.Red}
+                        size={22}
+                        style={{
+                          marginBottom: totalSize(5),
+                          marginRight: totalSize(0.5)
+                          // marginLeft:  totalSize(2)
+                        }}
+                      />
+                      </TouchableOpacity>
                     </View>
-
-                    <Icon
-                      name={"heart"}
-                      color={colors.Red}
-                      size={22}
-                      style={{
-                        marginBottom: totalSize(5),
-                        marginRight: totalSize(0.5)
-                        // marginLeft:  totalSize(2)
-                      }}
-                    />
-                  </View>
-                );
-              })}
+                  );
+                })
+              ) : (
+                <ActivityIndicator size={"large"} />
+              )}
             </View>
             {/* <Text
               style={[

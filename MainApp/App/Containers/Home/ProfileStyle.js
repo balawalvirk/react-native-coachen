@@ -13,11 +13,20 @@ import ApplicationStyles from "../../Themes/ApplicationStyles";
 import { totalSize, height, width } from "react-native-dimension";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { fonts } from "../../Themes/Fonts";
+import {_retrieveData} from "../../backend/AsyncFuncs";
 
 class ProfileStyle extends Component {
   constructor(props) {
+
     super(props);
-    this.state = {};
+    
+    this.state = {
+      userData: "",
+    };
+  }
+  async componentDidMount(){
+    let userData = await _retrieveData("login_data");
+     this.setState({userData:userData});
   }
 
   render() {
@@ -53,7 +62,7 @@ class ProfileStyle extends Component {
         >
           <View style={[ApplicationStyles.row, { alignItems: "center" }]}>
             <Image
-              source={require("../../Images/dummy_profile_pic.jpg")}
+              source={{uri:this.state.userData.profile_photo}}
               style={[
                 ApplicationStyles.profilepictureStyle,
                 { marginRight: totalSize(1.5) }
@@ -72,7 +81,7 @@ class ProfileStyle extends Component {
                   }
                 ]}
               >
-                Mille Knudsen
+                {this.state.userData.name}
               </Text>
               <Text
                 style={[
@@ -87,7 +96,7 @@ class ProfileStyle extends Component {
                   }
                 ]}
               >
-                Location
+                {this.state.userData.city}
               </Text>
               {/* <Text
                   style={[

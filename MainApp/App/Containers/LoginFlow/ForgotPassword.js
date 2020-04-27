@@ -6,19 +6,33 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Image,
+  TextInput,
   Platform,
   ScrollView
 } from "react-native";
 import colors from "../../Themes/Colors";
+import { CheckBox } from "react-native-elements";
 import ApplicationStyles from "../../Themes/ApplicationStyles";
 import { totalSize, height, width } from "react-native-dimension";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { fonts } from "../../Themes/Fonts";
 
-class Login extends Component {
+class ForgotPassword extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      email: "",
+      password: "",
+      name: "",
+      role: "",
+      profile_photo: "",
+      city: "",
+      phone: "",
+      about: "",
+      background: ""
+      //category_id 0
+      //type_id 0
+    };
   }
 
   render() {
@@ -45,73 +59,23 @@ class Login extends Component {
         >
           <View
             style={[
-              {
-                flex: Platform.OS == "ios" ? 0.45 : 0.35,
-                backgroundColor: colors.DarkGreyBg,
-                width: "100%"
-              }
-            ]}
-          />
-          <View
-            style={[
               styles.container,
               {
                 backgroundColor: colors.homeBgColor,
                 borderTopLeftRadius: totalSize(5),
                 borderTopRightRadius: totalSize(5),
-                width: "100%"
+                width: "100%",
+                paddingTop: totalSize(3)
               }
             ]}
           >
-            <View
-              style={{
-                width: "100%"
-              }}
-            >
-              <View
-                style={[
-                  {
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backgroundColor: colors.Red,
-                    alignSelf: "flex-end",
-                    width: totalSize(4),
-                    height: totalSize(4),
-                    borderRadius: totalSize(4) / 2,
-                    margin: totalSize(2.5)
-                  }
-                ]}
-              >
-                {/* <Image
-                  source={require("../../Images/cross.png")}
-                  style={[
-                    {
-                      width: totalSize(3),
-                      height: totalSize(3),
-                      resizeMode: "center",
-                      marginLeft: totalSize(3)
-                    }
-                  ]}
-                  tintColor={colors.snow}
-                /> */}
-                <Icon
-                  name={"close"}
-                  size={18}
-                  color={colors.snow}
-                  style={
-                    {
-                      //padding: totalSize(1.2)
-                    }
-                  }
-                />
-              </View>
-            </View>
             <ScrollView style={styles.container}>
               <View
                 style={[
                   styles.container,
                   {
-                    alignItems: "center"
+                    alignItems: "center",
+                    marginTop: totalSize(10)
                   }
                 ]}
               >
@@ -126,7 +90,7 @@ class Login extends Component {
                       }
                     ]}
                   >
-                    You need a{" "}
+                    Fill below fields for{" "}
                   </Text>
                   <Text
                     style={[
@@ -148,48 +112,51 @@ class Login extends Component {
                     {
                       fontWeight: "normal",
                       color: colors.SplashBlueBg,
-                      marginBottom: totalSize(1)
+                      marginBottom: totalSize(3)
                     }
                   ]}
                 >
                   to continue {"<3"}
                 </Text>
 
-                <TouchableOpacity
-                  style={[
-                    ApplicationStyles.initalScreenButton,
-                    {
-                      backgroundColor: colors.Green,
-                      marginTop: totalSize(2),
-                      marginBottom: totalSize(1.2)
-                    }
-                  ]}
-                  onPress={() => this.props.navigation.navigate("signup")}
-                >
-                  <Text
-                    style={[
-                      Platform.OS == "ios"
-                        ? ApplicationStyles.initialScreenButtonTextIos
-                        : ApplicationStyles.initialScreenButtonTextAndroid, //h4
-                      {
-                        color: colors.darkText,
-                        // fontWeight: "bold",
-                        fontFamily: fonts.futuraMedium
-                      }
-                    ]}
-                  >
-                    Register with e-mail
-                  </Text>
-                </TouchableOpacity>
+                <View style={styles.inputContainerStyle}>
+                  <TextInput
+                    style={styles.inputfieldStyle}
+                    placeholder="Email"
+                    placeholderTextColor={colors.steel}
+                    underlineColorAndroid="transparent"
+                    onChangeText={text => this.setState({ email: text })}
+                  />
+                </View>
+                <View style={styles.inputContainerStyle}>
+                  <TextInput
+                    style={styles.inputfieldStyle}
+                    placeholder="New Password"
+                    placeholderTextColor={colors.steel}
+                    underlineColorAndroid="transparent"
+                    onChangeText={text => this.setState({ email: text })}
+                  />
+                </View>
+                <View style={styles.inputContainerStyle}>
+                  <TextInput
+                    style={styles.inputfieldStyle}
+                    placeholder="Re-enter New Password"
+                    placeholderTextColor={colors.steel}
+                    underlineColorAndroid="transparent"
+                    onChangeText={text => this.setState({ email: text })}
+                  />
+                </View>
+
                 <TouchableOpacity
                   style={[
                     ApplicationStyles.initalScreenButton,
                     {
                       backgroundColor: colors.SplashBlueBg,
-                      marginBottom: totalSize(2)
+                      marginTop: totalSize(2),
+                      marginBottom: totalSize(1.2)
                     }
                   ]}
-                  onPress={() => this.props.navigation.navigate("signup")}
+                  onPress={() => this.props.navigation.navigate("initial")}
                 >
                   <Text
                     style={[
@@ -197,13 +164,14 @@ class Login extends Component {
                         ? ApplicationStyles.initialScreenButtonTextIos
                         : ApplicationStyles.initialScreenButtonTextAndroid, //h4
                       {
-                        color: colors.Green,
-                        fontWeight: "normal",
+                        // color: colors.darkText,
+                        color: colors.snow,
+                        // fontWeight: "bold",
                         fontFamily: fonts.futuraMedium
                       }
                     ]}
                   >
-                    Register with Apple
+                    Log In
                   </Text>
                 </TouchableOpacity>
 
@@ -359,10 +327,10 @@ class Login extends Component {
                     }
                   ]}
                 >
-                  Already have an account?{" "}
+                  Don't have an account?{" "}
                 </Text>
                 <TouchableOpacity
-                  onPress={() => this.props.navigation.navigate("loginAuth")}
+                  onPress={() => this.props.navigation.navigate("signup")}
                 >
                   <Text
                     style={[
@@ -376,7 +344,7 @@ class Login extends Component {
                       }
                     ]}
                   >
-                    Login
+                    Register
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -391,6 +359,31 @@ class Login extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1
+  },
+  buttonSmall: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: totalSize(5),
+    backgroundColor: colors.lightPink,
+    borderRadius: 2.5
+  },
+  inputContainerStyle: {
+    width: width(80),
+    height: height(8),
+    borderRadius: totalSize(5),
+    borderColor: colors.Blue,
+    backgroundColor: colors.snow,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: totalSize(1.5),
+    marginBottom: totalSize(1.5)
+  },
+  inputfieldStyle: {
+    flex: 1,
+    fontWeight: "normal",
+    color: colors.darkText,
+    fontFamily: fonts.poppinsLight
   },
   logo: {
     height: totalSize(6),
@@ -468,4 +461,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Login;
+export default ForgotPassword;

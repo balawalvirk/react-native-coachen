@@ -75,7 +75,7 @@ class Initial extends Component {
               backgroundColor: colors.SplashBlueBg,
               borderColor: "transparent"
             }
-          ]}
+          ]} 
           onPress={() => this.props.navigation.navigate("Coach")} //App ... Coach
         >
           <Text

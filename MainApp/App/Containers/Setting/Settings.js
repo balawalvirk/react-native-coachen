@@ -7,13 +7,17 @@ import {
   Image,
   Platform,
   Switch,
-  ScrollView
+  ScrollView,
+  Alert
 } from "react-native";
 import colors from "../../Themes/Colors";
 import ApplicationStyles from "../../Themes/ApplicationStyles";
 import { totalSize, height, width } from "react-native-dimension";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { fonts } from "../../Themes/Fonts";
+import {_retrieveData} from  "../../backend/AsyncFuncs";
+import {deleteUser} from  "../../backend/user/Auth";
+
 
 const tagList = [
   {
@@ -54,15 +58,29 @@ const tagList = [
   }
 ];
 
-class Settings extends Component {
+class Setting extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      data:"",
+    };
   }
+  async componentDidMount(){
+    let data = await _retrieveData("login_data");
+    this.setState({data:data});
+    console.log("setting",data);
+    };  
 
+    async del(){
+      let result=await deleteUser();
+      if(result){
+        Alert.alert(result.toString());
+        this.props.navigation.navigate("Login");
+      }
+    };
   static navigationOptions = ({ navigation }) => {
     return {
-      headerTitle: "Settings",
+      headerTitle: "Setting",
       headerStyle: { backgroundColor: colors.lightSnow },
       headerTitleStyle: {
         color: colors.SplashBlueBg,
@@ -76,7 +94,7 @@ class Settings extends Component {
       },
       headerLeft: (
         <TouchableOpacity
-          onPress={() => navigation.openDrawer()} //goBack()
+          onPress={() => navigation.goBack()} //goBack()
         >
           <Image
             source={require("../../Images/back.png")}
@@ -149,8 +167,8 @@ class Settings extends Component {
               <Text
                 style={[
                   Platform.OS == "ios"
-                    ? ApplicationStyles.h45
-                    : ApplicationStyles.h4,
+                    ? ApplicationStyles.h5
+                    : ApplicationStyles.h45,
                   { color: colors.darkText, fontFamily: fonts.poppinsRegular }
                 ]}
               >
@@ -160,8 +178,8 @@ class Settings extends Component {
                 source={require("../../Images/back.png")}
                 style={[
                   {
-                    width: totalSize(1.8),
-                    height: totalSize(1.8),
+                    width: totalSize(2.5),
+                    height: totalSize(2.5),
                     // resizeMode: "center",
                     marginLeft: totalSize(3),
                     transform: [{ rotate: "180deg" }],
@@ -215,7 +233,7 @@ class Settings extends Component {
                   }
                 ]}
               >
-                Mille Knudsen
+                {this.state.data.name}
               </Text>
             </View>
             <View
@@ -246,7 +264,7 @@ class Settings extends Component {
                   { color: colors.darkText, fontFamily: fonts.poppinsLight }
                 ]}
               >
-                Stockholm
+                {this.state.data.city}
               </Text>
             </View>
             <View
@@ -277,7 +295,7 @@ class Settings extends Component {
                   { color: colors.darkText, fontFamily: fonts.poppinsLight }
                 ]}
               >
-                +46 7017 6254
+                {this.state.data.phone}
               </Text>
             </View>
             <View
@@ -308,7 +326,7 @@ class Settings extends Component {
                   { color: colors.darkText, fontFamily: fonts.poppinsLight }
                 ]}
               >
-                name@email.com
+                {this.state.data.email}
               </Text>
             </View>
             <View
@@ -421,8 +439,8 @@ class Settings extends Component {
                 source={require("../../Images/back.png")}
                 style={[
                   {
-                    width: totalSize(1.8),
-                    height: totalSize(1.8),
+                    width: totalSize(2.5),
+                    height: totalSize(2.5),
                     // resizeMode: "center",
                     // marginLeft: totalSize(3),
                     transform: [{ rotate: "180deg" }],
@@ -462,8 +480,8 @@ class Settings extends Component {
                 source={require("../../Images/back.png")}
                 style={[
                   {
-                    width: totalSize(1.8),
-                    height: totalSize(1.8),
+                    width: totalSize(2.5),
+                    height: totalSize(2.5),
                     // resizeMode: "center",
                     // marginLeft: totalSize(3),
                     transform: [{ rotate: "180deg" }],
@@ -479,7 +497,7 @@ class Settings extends Component {
                 style={{ marginLeft: totalSize(1.5) }}
               /> */}
             </TouchableOpacity>
-            <TouchableOpacity
+            <TouchableOpacity onPress={this.del}
               style={[
                 {
                   marginHorizontal: totalSize(4),
@@ -582,4 +600,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default Settings;
+export default Setting;

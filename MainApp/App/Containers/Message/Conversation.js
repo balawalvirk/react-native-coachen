@@ -13,7 +13,9 @@ import ApplicationStyles from "../../Themes/ApplicationStyles";
 import { totalSize, height, width } from "react-native-dimension";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { fonts } from "../../Themes/Fonts";
-
+import { chatConnect, getAllMessages,sentMessage } from "../../backend/user/Jobs";
+import { _retrieveData } from "../../backend/AsyncFuncs";
+import { TextInput } from "react-native-gesture-handler";
 const CoachesList = [
   {
     type: "Mille Knudsen",
@@ -40,12 +42,50 @@ const CoachesList = [
 class Conversation extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      allMessges: '',
+    };
+  }
+  async componentDidMount() {
+    this.focusListener = this.props.navigation.addListener('willFocus', () => {
+      this.timer = setInterval(()=> this.getStart(), 3000)
+    });
+   // this.timer = setInterval(()=> this.getStart(), 3000)
+  
   }
 
+  async getStart(){
+    console.log("Hi");
+    let coach_id = await this.props.navigation.getParam("item");
+    let connect = await chatConnect(coach_id);
+    let allMessges = await getAllMessages(connect.conversation_id);
+    let userData = await _retrieveData("login_data");
+    console.log("coach_id",coach_id);
+    console.log("connect",connect);
+    console.log("allMessges",allMessges);
+    //console.log("coach_id",coach_id);
+    await this.setState({
+      coach_id: coach_id,
+      allMessges, allMessges,
+      userData: userData,
+      connect:connect,
+    });
+
+    const {setParams} = this.props.navigation;
+    setParams({headertitle: this.state.connect.receiver_name });
+  }
+async sendMessage(message){
+  
+  this.setState({text: " "});
+  let data=await sentMessage(this.state.connect.conversation_id,message,this.state.coach_id,this.state.userData.user_id);
+  console.log("SentMessage", data);
+  
+}
+
   static navigationOptions = ({ navigation }) => {
+    const {state} = navigation;
     return {
-      headerTitle: "Mille Knudsen",
+      headerTitle: state.params.headertitle,
       headerTitleStyle: {
         color: colors.darkText,
         fontSize: ApplicationStyles.headerTitleFontSize,
@@ -69,7 +109,7 @@ class Conversation extends Component {
       },
       headerRight: (
         <TouchableOpacity
-        // onPress={() => navigation.openDrawer()}
+         onPress={() => navigation.goBack()}
         >
           <Image
             source={require("../../Images/search.png")}
@@ -128,99 +168,112 @@ class Conversation extends Component {
           ]}
         >
           <ScrollView style={[styles.container]}>
-            <View style={[styles.container, { padding: totalSize(4) }]}>
-              <View
-                style={[
-                  ApplicationStyles.row,
-                  { marginVertical: totalSize(2) }
-                ]}
-              >
-                <Image
-                  source={require("../../Images/dummy_profile_pic.jpg")}
-                  style={[
-                    {
-                      width: totalSize(6),
-                      height: totalSize(6),
-                      borderRadius: totalSize(6) / 2,
-                      marginRight: totalSize(1.5)
-                    }
-                  ]}
-                />
+            {this.state.allMessges.length > 0 ? (
+              this.state.allMessges.slice(0).reverse().map((item, key) => {
+                 key=item.message_id
+                return (
+                  
+                  <View style={[styles.container, { padding: totalSize(4) }]}>
+                    {item.sender_id === this.state.userData.user_id ? (
+                      <View
+                        style={[
+                          ApplicationStyles.row,
+                          { marginVertical: totalSize(2) }
+                        ]}
+                      >
+                        <Image
+                          source={{ uri: item.sender_profile_photo }}
+                          style={[
+                            {
+                              width: totalSize(6),
+                              height: totalSize(6),
+                              borderRadius: totalSize(6) / 2,
+                              marginRight: totalSize(1.5)
+                            }
+                          ]}
+                        />
+                        <View
+                          style={{
+                            backgroundColor: colors.Green,
+                            justifyContent: "center",
+                            alignItems: "center",
+                            borderTopLeftRadius:
+                              Platform.OS == "ios" ? totalSize(3) : totalSize(5),
+                            borderTopRightRadius: totalSize(5),
+                            borderBottomRightRadius: totalSize(5)
+                          }}
+                        >
+                          <Text
+                            style={[
+                              Platform.OS == "ios"
+                                ? ApplicationStyles.h5
+                                : ApplicationStyles.h45,
+                              {
+                                fontWeight: "normal",
+                                color: colors.darkText,
+                                marginHorizontal: totalSize(2),
+                                fontFamily: fonts.poppinsRegular
+                                //marginVertical: totalSize(3)
+                              }
+                            ]}
+                          >
+                            {item.text}
+                          </Text>
+                        </View>
+                      </View>
+                    ) : (
+
+                      <View
+                style = {
+                      [
+                        ApplicationStyles.row,
+                        { marginVertical: totalSize(2), alignSelf: "flex-end" }
+                      ]
+                      }
+                        >
                 <View
-                  style={{
-                    backgroundColor: colors.Green,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderTopLeftRadius:
-                      Platform.OS == "ios" ? totalSize(3) : totalSize(5),
-                    borderTopRightRadius: totalSize(5),
-                    borderBottomRightRadius: totalSize(5)
+                  style = {{
+                          backgroundColor: colors.darkText,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          borderTopLeftRadius: totalSize(5),
+                          borderTopRightRadius:
+                          Platform.OS == "ios" ? totalSize(3) : totalSize(5),
+                      borderBottomLeftRadius: totalSize(5)
                   }}
                 >
                   <Text
+                      style={[
+                        Platform.OS == "ios"
+                          ? ApplicationStyles.h5
+                          : ApplicationStyles.h45,
+                        {
+                          fontWeight: "normal",
+                          color: colors.snow,
+                          marginHorizontal: totalSize(2),
+                          fontFamily: fonts.poppinsRegular
+                          //marginVertical: totalSize(3)
+                        }
+                      ]}
+                    >
+                      {item.text}
+                    </Text>
+                  </View>
+                  <Image
+                    source={{ uri: item.reciver_profile_photo }}
                     style={[
-                      Platform.OS == "ios"
-                        ? ApplicationStyles.h5
-                        : ApplicationStyles.h45,
                       {
-                        fontWeight: "normal",
-                        color: colors.darkText,
-                        marginHorizontal: totalSize(2),
-                        fontFamily: fonts.poppinsRegular
-                        //marginVertical: totalSize(3)
+                        width: totalSize(6),
+                        height: totalSize(6),
+                        borderRadius: totalSize(6) / 2,
+                        marginLeft: totalSize(1.5)
                       }
                     ]}
-                  >
-                    Hey send me an audio file!
-                  </Text>
-                </View>
+                  />
               </View>
-              <View
-                style={[
-                  ApplicationStyles.row,
-                  { marginVertical: totalSize(2), alignSelf: "flex-end" }
-                ]}
-              >
-                <View
-                  style={{
-                    backgroundColor: colors.darkText,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderTopLeftRadius: totalSize(5),
-                    borderTopRightRadius:
-                      Platform.OS == "ios" ? totalSize(3) : totalSize(5),
-                    borderBottomLeftRadius: totalSize(5)
-                  }}
-                >
-                  <Text
-                    style={[
-                      Platform.OS == "ios"
-                        ? ApplicationStyles.h5
-                        : ApplicationStyles.h45,
-                      {
-                        fontWeight: "normal",
-                        color: colors.snow,
-                        marginHorizontal: totalSize(2),
-                        fontFamily: fonts.poppinsRegular
-                        //marginVertical: totalSize(3)
-                      }
-                    ]}
-                  >
-                    Yep, here it is.
-                  </Text>
-                </View>
-                <Image
-                  source={require("../../Images/dummy_profile_pic.jpg")}
-                  style={[
-                    {
-                      width: totalSize(6),
-                      height: totalSize(6),
-                      borderRadius: totalSize(6) / 2,
-                      marginLeft: totalSize(1.5)
-                    }
-                  ]}
-                />
-              </View>
+         )}
+
+{/*                
               <View
                 style={[
                   ApplicationStyles.row,
@@ -361,61 +414,71 @@ class Conversation extends Component {
                     Hey, Send me audio file!
                   </Text>
                 </View>
-              </View>
-            </View>
+              </View> */}
+        </View>
+             );
+            })
+            ):(null)}
           </ScrollView>
-          <View
-            style={{
-              //alignSelf: "flex-end",
-              justifyContent: "center",
-              alignItems: "center",
-              marginVertical: totalSize(4)
+      <View
+        style={{
+          //alignSelf: "flex-end",
+          justifyContent: "center",
+          alignItems: "center",
+          marginVertical: totalSize(4)
+        }}
+      >
+        <View
+          style={{
+            width: width(80),
+            height: totalSize(5),
+            borderRadius: totalSize(5),
+            borderColor: colors.Blue,
+            backgroundColor: colors.snow,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between"
+          }}
+        >
+          <TextInput
+            style={[
+              Platform.OS == "ios"
+                ? ApplicationStyles.h4
+                : ApplicationStyles.h375,
+              {
+                fontWeight: "normal",
+                color: colors.darkText,
+                marginHorizontal: totalSize(2),
+                padding:totalSize(0.5),
+                fontFamily: fonts.poppinsLight
+              }
+            ]}
+            onChangeText={text => {
+              this.setState({ text: text });
             }}
+            placeholder={"Messages ..."}
           >
-            <View
-              style={{
-                width: width(80),
-                height: totalSize(5),
-                borderRadius: totalSize(5),
-                borderColor: colors.Blue,
-                backgroundColor: colors.snow,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between"
-              }}
-            >
-              <Text
-                style={[
-                  Platform.OS == "ios"
-                    ? ApplicationStyles.h4
-                    : ApplicationStyles.h375,
-                  {
-                    fontWeight: "normal",
-                    color: colors.darkText,
-                    marginHorizontal: totalSize(2),
-                    fontFamily: fonts.poppinsLight
-                  }
-                ]}
-              >
-                Messages ...
-              </Text>
-              <Image
-                source={require("../../Images/Call.png")}
-                style={[
-                  {
-                    width: totalSize(4),
-                    height: totalSize(4),
-                    // resizeMode: "center",
-                    marginRight: totalSize(2),
-                    tintColor: colors.darkText
-                  }
-                ]}
-                tintColor={colors.darkText}
-              />
-            </View>
-          </View>
+            
+              </TextInput>
+              <TouchableOpacity onPress={() => this.sendMessage(this.state.text)}>
+          <Image
+            source={require("../../Images/Call.png")}
+            style={[
+              {
+                width: totalSize(4),
+                height: totalSize(4),
+                // resizeMode: "center",
+                marginRight: totalSize(2),
+                tintColor: colors.darkText
+              }
+            ]}
+            tintColor={colors.darkText}
+          />
+          </TouchableOpacity>
         </View>
       </View>
+        </View >
+      </View >
     );
   }
 }

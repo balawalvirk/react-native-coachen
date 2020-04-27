@@ -14,7 +14,7 @@ import SliderEntry from "./components/SliderEntry";
 import styles, { colors } from "./styles/index.style";
 import { ENTRIES1, ENTRIES2 } from "./static/entries";
 import { scrollInterpolators, animatedStyles } from "./utils/animations";
-
+import {getCrouselImages} from "../backend/user/Jobs";
 const IS_ANDROID = Platform.OS === "android";
 const SLIDER_1_FIRST_ITEM = 0;
 
@@ -22,10 +22,15 @@ export default class example extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      slider1ActiveSlide: SLIDER_1_FIRST_ITEM
+      slider1ActiveSlide: SLIDER_1_FIRST_ITEM,
+      ENTRIES1:"",
     };
   }
-
+async componentDidMount(){
+  let data=await getCrouselImages();
+  this.setState({ENTRIES1:data});
+  console.log("Crousel DATA",data);
+}
   _renderItem({ item, index }) {
     return <SliderEntry data={item} even={(index + 1) % 2 === 0} />;
   }
@@ -58,7 +63,7 @@ export default class example extends Component {
         <Text style={styles.subtitle}>{title}</Text> */}
         <Carousel
           ref={c => (this._slider1Ref = c)}
-          data={ENTRIES1}
+          data={this.state.ENTRIES1}
           renderItem={this._renderItemWithParallax}
           sliderWidth={sliderWidth}
           itemWidth={itemWidth}
@@ -77,7 +82,7 @@ export default class example extends Component {
           onSnapToItem={index => this.setState({ slider1ActiveSlide: index })}
         />
         <Pagination
-          dotsLength={ENTRIES1.length}
+          dotsLength={this.state.ENTRIES1.length}
           activeDotIndex={slider1ActiveSlide}
           containerStyle={styles.paginationContainer}
           dotColor={"rgba(255, 255, 255, 0.92)"}

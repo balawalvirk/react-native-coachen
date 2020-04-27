@@ -6,7 +6,8 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Platform
+  Platform,
+  ActivityIndicator
 } from "react-native";
 import colors from "../../Themes/Colors";
 import ApplicationStyles from "../../Themes/ApplicationStyles";
@@ -14,6 +15,7 @@ import { totalSize, height, width } from "react-native-dimension";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { fonts } from "../../Themes/Fonts";
 import SwitchSelector from "react-native-switch-selector";
+import { getTypes, getCoachByCatId } from "../../backend/user/Jobs";
 
 const options = [
   { label: "Newest", value: "1" },
@@ -62,14 +64,19 @@ const profileList = [
 class Category extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      TypeData: [],
+      previousData:'',
+      coachSort:'1',
+    };
   }
 
   static navigationOptions = ({ navigation }) => {
+    const {state} = navigation;
     return {
-      headerTitle: "Music",
+      headerTitle: state.params.headertitle,
       headerStyle: {
-        backgroundColor: colors.redHeader,
+        backgroundColor: state.params.headerColor,
         shadowColor: "transparent",
         shadowRadius: 0,
         elevation: 0,
@@ -122,8 +129,23 @@ class Category extends Component {
       )
     };
   };
+  
+  async componentDidMount() {
+    let typeData = await getTypes();
+    
+    let previousData = await this.props.navigation.getParam("item");
+    let coachData = await getCoachByCatId(previousData.category_id);
+    console.log(coachData);
+    this.setState({
+      TypeData: coachData,
+      previousData: previousData
+    });
+    const {setParams} = this.props.navigation;
+    setParams({headertitle: this.state.previousData.name,headerColor:this.state.previousData.color });
+  }
 
   render() {
+    
     return (
       <View style={[styles.container, { backgroundColor: colors.homeBgColor }]}>
         <ScrollView style={styles.container}>
@@ -146,141 +168,157 @@ class Category extends Component {
                 alignItems: "center"
               }}
             >
-              {profileList.map((item, key) => {
-                return (
-                  <TouchableOpacity
-                    key={key}
-                    style={[
-                      ApplicationStyles.row,
-                      {
-                        // flex: 1,
-                        width: width(90),
-                        backgroundColor: colors.snow,
-                        padding: totalSize(2),
-                        marginHorizontal: totalSize(2),
-                        marginVertical: totalSize(0.5),
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        borderRadius: totalSize(3)
+              {this.state.TypeData.length > 0 && this.state.TypeData ? (
+                this.state.TypeData.map((item, key) => {
+                  return (
+                    <TouchableOpacity
+                      key={key}
+                      style={[
+                        ApplicationStyles.row,
+                        {
+                          // flex: 1,
+                          width: width(90),
+                          backgroundColor: colors.snow,
+                          padding: totalSize(2),
+                          marginHorizontal: totalSize(2),
+                          marginVertical: totalSize(0.5),
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          borderRadius: totalSize(3)
+                        }
+                      ]}
+                      onPress={() =>
+                        this.props.navigation.navigate("music", { item })
                       }
-                    ]}
-                    onPress={() => this.props.navigation.navigate("music")}
-                  >
-                    <View
-                      style={[ApplicationStyles.row, { alignItems: "center" }]}
                     >
-                      <Image
-                        source={require("../../Images/dummy_profile_pic.jpg")}
+                      <View
                         style={[
-                          Platform.OS == "ios"
-                            ? ApplicationStyles.profilepictureStyleIos
-                            : ApplicationStyles.profilepictureStyle,
-                          { marginRight: totalSize(1) }
+                          ApplicationStyles.row,
+                          { alignItems: "center" }
                         ]}
-                      />
-                      <View>
-                        <View style={[ApplicationStyles.row]}>
-                          <View>
-                            <Text
-                              style={[
-                                Platform.OS == "ios"
-                                  ? ApplicationStyles.profileNameIos
-                                  : ApplicationStyles.profileName,
-                                {
-                                  fontWeight: "bold",
-                                  color: colors.darkPurple,
-                                  marginHorizontal: totalSize(1)
-                                  // fontFamily: fonts.futuraMedium
-                                }
-                              ]}
-                            >
-                              {item.type}
-                            </Text>
-                            <Text
-                              style={[
-                                Platform.OS == "ios"
-                                  ? ApplicationStyles.h5
-                                  : ApplicationStyles.h4,
-                                {
-                                  fontWeight: "normal",
-                                  color: colors.darkPurple,
-                                  marginHorizontal: totalSize(1)
-                                  //marginVertical: totalSize(3)
-                                }
-                              ]}
-                            >
-                              {item.genere}
-                            </Text>
-
-                            <View
-                              style={{
-                                backgroundColor: item.color,
-                                width: width(15),
-                                justifyContent: "center",
-                                alignItems: "center",
-                                marginHorizontal: totalSize(1),
-                                marginVertical: totalSize(0.35),
-                                borderRadius: totalSize(5)
-                              }}
-                              // key={key}
-                            >
+                      >
+                        <Image
+                          // source={require("../../Images/dummy_profile_pic.jpg")}
+                          source={{ uri: item.image }}
+                          style={[
+                            Platform.OS == "ios"
+                              ? ApplicationStyles.profilepictureStyleIos
+                              : ApplicationStyles.profilepictureStyle,
+                            { marginRight: totalSize(1) }
+                          ]}
+                        />
+                        <View>
+                          <View style={[ApplicationStyles.row]}>
+                            <View>
+                              <Text
+                                style={[
+                                  Platform.OS == "ios"
+                                    ? ApplicationStyles.profileNameIos
+                                    : ApplicationStyles.profileName,
+                                  {
+                                    fontWeight: "bold",
+                                    color: colors.darkPurple,
+                                    marginHorizontal: totalSize(1)
+                                    // fontFamily: fonts.futuraMedium
+                                  }
+                                ]}
+                              >
+                                {item.name}
+                              </Text>
                               <Text
                                 style={[
                                   Platform.OS == "ios"
                                     ? ApplicationStyles.h5
-                                    : ApplicationStyles.h45,
+                                    : ApplicationStyles.h4,
                                   {
                                     fontWeight: "normal",
-                                    color: colors.snow,
-                                    marginVertical: totalSize(0.2)
-                                    // marginHorizontal: totalSize(1.3)
+                                    color: colors.darkPurple,
+                                    marginHorizontal: totalSize(1)
+                                    //marginVertical: totalSize(3)
                                   }
                                 ]}
                               >
-                                Music
+                                {item.genere}
+                              </Text>
+
+                              <View
+                                style={{
+                                  backgroundColor: item.color,
+                                  width: width(15),
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  marginHorizontal: totalSize(1),
+                                  marginVertical: totalSize(0.35),
+                                  borderRadius: totalSize(5)
+                                }}
+                                // key={key}
+                              >
+                                <Text
+                                  style={[
+                                    Platform.OS == "ios"
+                                      ? ApplicationStyles.h5
+                                      : ApplicationStyles.h45,
+                                    {
+                                      fontWeight: "normal",
+                                      color: colors.snow,
+                                      marginVertical: totalSize(0.2)
+                                      // marginHorizontal: totalSize(1.3)
+                                    }
+                                  ]}
+                                >
+                                  Music
+                                </Text>
+                              </View>
+                            </View>
+
+                            <View
+                              style={[
+                                ApplicationStyles.row,
+                                { justifyContent: "center" }
+                              ]}
+                            >
+                              <Icon
+                                name={"star"}
+                                color={colors.star}
+                                size={22}
+                              />
+                              <Text
+                                style={[
+                                  Platform.OS == "ios"
+                                    ? ApplicationStyles.h45
+                                    : ApplicationStyles.h375,
+                                  {
+                                    fontWeight: "normal",
+                                    color: colors.star,
+                                    marginHorizontal: totalSize(0.5)
+                                  }
+                                ]}
+                              >
+                                {item.rating}
                               </Text>
                             </View>
                           </View>
-
-                          <View
-                            style={[
-                              ApplicationStyles.row,
-                              { justifyContent: "center" }
-                            ]}
-                          >
-                            <Icon name={"star"} color={colors.star} size={22} />
-                            <Text
-                              style={[
-                                Platform.OS == "ios"
-                                  ? ApplicationStyles.h45
-                                  : ApplicationStyles.h375,
-                                {
-                                  fontWeight: "normal",
-                                  color: colors.star,
-                                  marginHorizontal: totalSize(0.5)
-                                }
-                              ]}
-                            >
-                              {item.rating}
-                            </Text>
-                          </View>
                         </View>
                       </View>
-                    </View>
 
-                    <Icon
-                      name={"heart"}
-                      color={colors.lightBlue}
-                      size={22}
-                      style={{
-                        marginBottom: totalSize(5),
-                        marginRight: totalSize(0.5)
-                        // marginLeft:  totalSize(2)
-                      }}
-                    />
-                  </TouchableOpacity>
-                );
-              })}
+                      <Icon
+                        name={"heart"}
+                        color={colors.lightBlue}
+                        size={22}
+                        style={{
+                          marginBottom: totalSize(5),
+                          marginRight: totalSize(0.5)
+                          // marginLeft:  totalSize(2)
+                        }}
+                      />
+                    </TouchableOpacity>
+                  );
+                })
+              ) : (
+
+                <ActivityIndicator size={"large"} />
+              )}
+              
             </View>
           </View>
         </ScrollView>
@@ -290,7 +328,7 @@ class Category extends Component {
             style={[
               styles.container,
               {
-                backgroundColor: colors.redHeader
+                backgroundColor: this.state.previousData.color
               }
             ]}
           >
@@ -308,15 +346,14 @@ class Category extends Component {
                 }
               ]}
             >
-              Category explaination lorem ipsum color sit amet, consectuter
-              adipiscing elit, sed do eiusmod tempor incididunt ut labore.
+              {this.state.previousData.description}
             </Text>
           </View>
           <View
             style={[
               styles.container,
               {
-                backgroundColor: colors.redHeader,
+                backgroundColor: this.state.previousData.color,
                 width: "100%",
                 alignSelf: "center",
                 borderBottomLeftRadius: totalSize(7),
@@ -376,7 +413,7 @@ class Category extends Component {
               <SwitchSelector
                 options={options}
                 initial={0}
-                buttonColor={colors.redHeader}
+                buttonColor={this.state.previousData.color}
                 selectedColor={colors.barFillMusic}
                 backgroundColor={colors.barFillMusic}
                 textColor={colors.snow}
@@ -386,9 +423,7 @@ class Category extends Component {
                 animationDuration={300}
                 height={30}
                 hasPadding
-                // onPress={value =>
-                //   console.log(`Call onPress with value: ${value}`)
-                // }
+                onPress={value => this.setState({ coachSort: value })}
               />
             </View>
           </View>

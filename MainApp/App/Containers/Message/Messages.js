@@ -13,7 +13,8 @@ import ApplicationStyles from "../../Themes/ApplicationStyles";
 import { totalSize, height, width } from "react-native-dimension";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { fonts } from "../../Themes/Fonts";
-
+import {_retrieveData} from "../../backend/AsyncFuncs";
+import{getAllConverstion} from "../../backend/user/Jobs";
 const CoachesList = [
   {
     type: "Mille Knudsen",
@@ -40,7 +41,19 @@ const CoachesList = [
 class Messages extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      CoachesList:'',
+    };
+  }
+  async componentDidMount() {
+    let userData = await _retrieveData("login_data");     
+    let allConversationData = await getAllConverstion();
+    await this.setState({
+      userData: userData,
+      CoachesList:allConversationData,
+          });
+  
+    console.log("coachLIST",this.state.CoachesList);
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -50,7 +63,7 @@ class Messages extends Component {
         color: colors.darkGreen,
         fontSize: ApplicationStyles.headerTitleFontSize,
         fontWeight: Platform.OS == "ios" ? "bold" : "normal",
-        ontWeight: "normal",
+        //ontWeight: "normal",
         fontFamily: fonts.futuraBold
         //left: width(100) / 3
       },
@@ -69,7 +82,7 @@ class Messages extends Component {
         }
       },
       headerRight: (
-        <TouchableOpacity onPress={() => navigation.openDrawer()}>
+        <TouchableOpacity>
           <Image
             source={require("../../Images/search.png")}
             style={[
@@ -84,7 +97,7 @@ class Messages extends Component {
         </TouchableOpacity>
       ),
       headerLeft: (
-        <TouchableOpacity onPress={() => navigation.toggleDrawer()}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
             source={require("../../Images/back.png")}
             style={[
@@ -135,7 +148,8 @@ class Messages extends Component {
                 justifyContent: "center"
               }}
             >
-              {CoachesList.map((item, key) => {
+              { this.state.CoachesList.length>0 ?(
+              this.state.CoachesList.map((item, key) => {
                 return (
                   <TouchableOpacity
                     style={[
@@ -146,17 +160,17 @@ class Messages extends Component {
                         marginBottom: totalSize(2),
                         justifyContent: "space-between",
                         alignItems: "center"
-                        //borderBottomWidth: 0.5
+                        //borderBottomWidth: 0.5 
                       }
                     ]}
-                    onPress={() => this.props.navigation.navigate("Chat")}
+                    onPress={() => this.props.navigation.navigate("Chat", { item:item.receiver_id })}
                     key={key}
                   >
                     <View
                       style={[ApplicationStyles.row, { alignItems: "center" }]}
                     >
                       <Image
-                        source={require("../../Images/dummy_profile_pic.jpg")}
+                        source={{uri:item.sender_profile_photo}}
                         style={[
                           Platform.OS == "ios"
                             ? ApplicationStyles.smallCircleStyleIOS
@@ -180,7 +194,7 @@ class Messages extends Component {
                                 }
                               ]}
                             >
-                              {item.type}
+                              {item.sender_name}
                             </Text>
                             <Text
                               style={[
@@ -193,7 +207,7 @@ class Messages extends Component {
                                 }
                               ]}
                             >
-                              Usability is measured..
+                              {item.last_message.text}
                             </Text>
                           </View>
                         </View>
@@ -204,15 +218,21 @@ class Messages extends Component {
                         ApplicationStyles.h45,
                         {
                           fontWeight: "normal",
-                          color: colors.steel
+                          color: colors.steel,
+                          marginTop:-30,
                         }
                       ]}
                     >
-                      12:35
+                     {item.last_message.created_at}
                     </Text>
                   </TouchableOpacity>
                 );
-              })}
+              }
+              
+              )
+              ):(
+                <Text>No conversation availbe </Text>
+              )}
             </View>
           </ScrollView>
         </View>

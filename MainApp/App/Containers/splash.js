@@ -1,14 +1,5 @@
 import React, { Component } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  Image,
-  Switch,
-  ScrollView
-} from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import colors from "../Themes/Colors";
 import ApplicationStyles from "../Themes/ApplicationStyles";
 import { totalSize, height, width } from "react-native-dimension";
@@ -20,19 +11,33 @@ class Splash extends Component {
   constructor(props) {
     super(props);
     this.state = {};
+    // this._bootstrapAsync();
   }
 
+  // Fetch the token from storage then navigate to our appropriate place
+  // _bootstrapAsync = async () => {
+
   async componentDidMount() {
-    const userToken = await AsyncStorage.getItem(
-      GlobalConst.STORAGE_KEYS.userId
-    );
-    //alert(userToken);
+    AsyncStorage.removeItem("login_data");
+    const userToken = await AsyncStorage.getItem("login_data");
+    console.log(userToken);
+    // This will switch to the App screen or Auth screen and this loading
+    // screen will be unmounted and thrown away.
     let that = this;
-    setTimeout(() => {
-      // that.props.navigation.navigate(userToken ? "App" : "Auth");
-      that.props.navigation.navigate("Auth");
-    }, 3000);
+    that.props.navigation.navigate(userToken ? "initial" : "Auth");
   }
+
+  // async componentDidMount() {
+  //   const userToken = await AsyncStorage.getItem(
+  //     GlobalConst.STORAGE_KEYS.userId
+  //   );
+  //   //alert(userToken);
+  //   let that = this;
+  //   setTimeout(() => {
+  //     // that.props.navigation.navigate(userToken ? "App" : "Auth");
+  //     that.props.navigation.navigate("Auth");
+  //   }, 3000);
+  // }
 
   render() {
     return (

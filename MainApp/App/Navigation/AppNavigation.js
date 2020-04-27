@@ -26,8 +26,11 @@ import {
 // import { createStackNavigator } from "react-navigation-stack";
 // import { createMaterialBottomTabNavigator } from "react-navigation-material-bottom-tabs";
 // import { createDrawerNavigator, DrawerItems } from "react-navigation-drawer";
+import AuthLoadingScreen from "../Containers/LoginFlow/AuthLoadingScreen";
 import Login from "../Containers/LoginFlow/Login";
-// import Signup from "../Containers/LoginFlow/signup";
+import LoginAuth from "../Containers/LoginFlow/LoginAuth";
+import Signup from "../Containers/LoginFlow/Signup";
+import ForgotPassword from "../Containers/LoginFlow/ForgotPassword";
 // import Home from "../Containers/MainFlow/Home/home";
 import Splash from "../Containers/splash";
 import Initial from "../Containers/InitialScreens/Initial";
@@ -48,6 +51,7 @@ import BookingCalendarNew from "../Containers/Calendar/BookingCalendarNew";
 import ScheduleSetting from "../Containers/Calendar/ScheduleSetting";
 import Favourites from "../Containers/Coach/Favourites";
 import Category from "../Containers/Coach/Category";
+import SearchByName from "../Containers/Search/SearchByName";
 import Music from "../Containers/Coach/Music";
 import Messages from "../Containers/Message/Messages";
 import MessageStyle from "../Containers/Message/MessageStyle";
@@ -66,17 +70,29 @@ const walkthroughStack = createStackNavigator({
 const Auth = createStackNavigator(
   {
     login: {
-      screen: Login, //Login
+      screen: Login,
+      navigationOptions: {
+        header: null
+      }
+    },
+    loginAuth: {
+      screen: LoginAuth,
+      navigationOptions: {
+        header: null
+      }
+    },
+    signup: {
+      screen: Signup,
+      navigationOptions: {
+        header: null
+      }
+    },
+    forgotPassword: {
+      screen: ForgotPassword,
       navigationOptions: {
         header: null
       }
     }
-    // signup: {
-    //   screen: Signup,
-    //   navigationOptions: {
-    //     header: null
-    //   }
-    // }
   },
   {
     initialRouteName: "login"
@@ -237,7 +253,7 @@ const CoachStack = createStackNavigator(
       }
     },
     convo: {
-      screen: Conversation,
+      screen: Messages,
       navigationOptions: {
         // header: null
       }
@@ -347,7 +363,7 @@ const settingStack = createStackNavigator({
 
 const appStack = createStackNavigator({
   HomePage: {
-    screen: Home
+    screen: Home 
   },
   // HomeTabs: {
   //   screen: TabVocalScreens
@@ -366,6 +382,9 @@ const appStack = createStackNavigator({
   },
   Categorys: {
     screen: Category
+  },
+  SearchByNames: {
+    screen: SearchByName
   },
   music: {
     screen: Music
@@ -445,16 +464,18 @@ const DrawerStack = createDrawerNavigator(
 export default createAppContainer(
   createSwitchNavigator(
     {
+      // Loading: AuthLoadingScreen,
       splash: Splash,
       Auth: Auth,
       initial: Initial,
       Coach: CoachStack,
       walkThrough: walkthroughStack,
-      App: DrawerStack
+      App: DrawerStack,
+      Home:Home, 
+      messageStack:messageStack,
     },
     {
-      initialRouteName: "splash"
-      // initialRouteName: "Auth"
+      initialRouteName:  "splash"
     }
   )
 );

@@ -6,14 +6,17 @@ import {
   TouchableOpacity,
   Image,
   Platform,
-  ScrollView
+  ScrollView,
+  Dimensions,
 } from "react-native";
 import colors from "../../Themes/Colors";
 import ApplicationStyles from "../../Themes/ApplicationStyles";
 import { totalSize, height, width } from "react-native-dimension";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { fonts } from "../../Themes/Fonts";
-
+import { getCoachById,get_unread_message, 
+  get_coach_total_earnig, get_coach_total_fav, get_coach_total_session } from "../../backend/user/Jobs";
+import ProgressBarAnimated from 'react-native-progress-bar-animated';
 const tagList = [
   {
     type: "Music",
@@ -44,7 +47,14 @@ const tagList = [
 class VocalCoach extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      data: "",
+      tagList: "",
+      total_earning: "",
+      total_fav: "",
+      get_all_session: "",
+      get_unread_message:"",
+    };
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -73,8 +83,32 @@ class VocalCoach extends Component {
       }
     };
   };
+  async componentDidMount() {
+    let data = await getCoachById();
+    let total_earning = await get_coach_total_earnig();
+    let total_fav = await get_coach_total_fav();
+    let get_all_session = await get_coach_total_session();
+    let get_unread_messages= await get_unread_message();
+    let txt = get_unread_messages;
+   
+    var lastChar= this.getLastChar(txt);
+    this.setState({
+      data: data, total_earning: total_earning,
+      total_fav: total_fav,
+      get_all_session: get_all_session,
+      get_unread_messages:get_unread_messages
+    });
 
+    console.log(lastChar);
+  };
+
+  async getLastChar(txt){
+    
+    var lastChar = String(txt).substr(txt.toString().length - 1);
+    return lastChar
+  }
   render() {
+
     return (
       <View style={[styles.container, { backgroundColor: colors.darkText }]}>
         <View
@@ -104,8 +138,9 @@ class VocalCoach extends Component {
                 }}
               >
                 <View style={[ApplicationStyles.row]}>
+
                   <Image
-                    source={require("../../Images/dummy_profile_pic.jpg")}
+                    source={{ uri: this.state.data.profile_photo }}
                     style={[
                       Platform.OS == "ios"
                         ? ApplicationStyles.profilepictureStyleIos
@@ -113,6 +148,7 @@ class VocalCoach extends Component {
                       { marginRight: totalSize(1) }
                     ]}
                   />
+
                   <View>
                     <View style={[ApplicationStyles.row]}>
                       <View>
@@ -135,7 +171,7 @@ class VocalCoach extends Component {
                               }
                             ]}
                           >
-                            Mille Knudsen
+                            {this.state.data.name}
                           </Text>
                           <Icon name={"star"} color={colors.star} size={22} />
                           <Text
@@ -150,7 +186,7 @@ class VocalCoach extends Component {
                               }
                             ]}
                           >
-                            4.5
+                            {this.state.data.averrage_rating}
                           </Text>
                         </View>
 
@@ -168,7 +204,8 @@ class VocalCoach extends Component {
                             }
                           ]}
                         >
-                          Voacl Coach
+                          {this.state.data.type ? (
+                            this.state.data.type.name) : null}
                         </Text>
                       </View>
                     </View>
@@ -181,38 +218,39 @@ class VocalCoach extends Component {
                         }
                       ]}
                     >
-                      {tagList.map((item, key) => {
-                        return (
-                          <View
-                            style={{
-                              backgroundColor: item.color,
-                              width: width(15),
-                              justifyContent: "center",
-                              alignItems: "center",
-                              marginHorizontal: totalSize(1),
-                              marginVertical: totalSize(0.35),
-                              borderRadius: totalSize(5)
-                            }}
-                            key={key}
-                          >
-                            <Text
-                              style={[
-                                Platform.OS == "ios"
-                                  ? ApplicationStyles.h5
-                                  : ApplicationStyles.h45,
-                                {
-                                  fontWeight: "normal",
-                                  color: colors.snow,
-                                  marginVertical: totalSize(0.2)
-                                  // marginHorizontal: totalSize(1.3)
-                                }
-                              ]}
+                      {this.state.data.category ? (
+                        this.state.data.category.map((item, key) => {
+                          return (
+                            <View
+                              style={{
+                                backgroundColor: item.color,
+                                width: width(15),
+                                justifyContent: "center",
+                                alignItems: "center",
+                                marginHorizontal: totalSize(1),
+                                marginVertical: totalSize(0.35),
+                                borderRadius: totalSize(5)
+                              }}
+                              key={key}
                             >
-                              {item.type}
-                            </Text>
-                          </View>
-                        );
-                      })}
+                              <Text
+                                style={[
+                                  Platform.OS == "ios"
+                                    ? ApplicationStyles.h5
+                                    : ApplicationStyles.h45,
+                                  {
+                                    fontWeight: "normal",
+                                    color: colors.snow,
+                                    marginVertical: totalSize(0.2)
+                                    // marginHorizontal: totalSize(1.3)
+                                  }
+                                ]}
+                              >
+                                {item.name}
+                              </Text>
+                            </View>
+                          );
+                        })) : null}
                     </View>
                   </View>
                 </View>
@@ -254,9 +292,7 @@ class VocalCoach extends Component {
                     }
                   ]}
                 >
-                  Lorem Ipsum is simply dummy text of the printing and
-                  typesetting industry. Lorem Ipsum has been the industry's
-                  standard dummy text.
+                  {this.state.data.about}
                 </Text>
               </View>
 
@@ -480,7 +516,7 @@ class VocalCoach extends Component {
                         }
                       ]}
                     >
-                      Total earning January
+                      Total earning {this.state.total_earning.month}
                     </Text>
                     <View
                       style={[
@@ -500,7 +536,7 @@ class VocalCoach extends Component {
                           }
                         ]}
                       >
-                        3050Kr
+                        {this.state.total_earning.total > 0 ? this.state.total_earning.total : 0}
                       </Text>
                     </View>
                   </View>
@@ -575,7 +611,7 @@ class VocalCoach extends Component {
                               }
                             ]}
                           >
-                            54
+                            {this.state.get_all_session.total > 0 ? this.state.get_all_session.total : 0}
                           </Text>
                         </View>
                       </View>
@@ -608,7 +644,15 @@ class VocalCoach extends Component {
                       Sessions made
                     </Text>
                     <View style={{ marginHorizontal: totalSize(2) }}>
-                      <View
+                      <ProgressBarAnimated
+
+                        width={width(25)}
+                        height={height(1)}
+                        value={this.state.get_all_session.total > 0 ? this.state.get_all_session.total : 0}
+
+                        backgroundColorOnComplete="#6CC644"
+                      />
+                      {/* <View
                         style={{
                           width: width(25),
                           height: height(1),
@@ -624,7 +668,7 @@ class VocalCoach extends Component {
                             backgroundColor: colors.tagBlue
                           }}
                         />
-                      </View>
+                      </View> */}
                     </View>
                   </View>
                 </View>
@@ -688,7 +732,7 @@ class VocalCoach extends Component {
                               }
                             ]}
                           >
-                            43
+                            {this.state.total_fav.total_fav > 0 ? this.state.total_fav.total_fav : 0}
                           </Text>
                         </View>
                       </View>
@@ -714,7 +758,14 @@ class VocalCoach extends Component {
                       Favourites
                     </Text>
                     <View style={{ marginHorizontal: totalSize(2) }}>
-                      <View
+                      <ProgressBarAnimated
+
+                        width={width(25)}
+                        height={height(1)}
+                        value={this.state.total_fav.total_fav > 0 ? this.state.total_fav.total_fav : 0}
+                        backgroundColorOnComplete="#9D4949"
+                      />
+                      {/* <View
                         style={{
                           width: width(25),
                           height: height(1),
@@ -731,7 +782,7 @@ class VocalCoach extends Component {
                             //position: "absolute"
                           }}
                         />
-                      </View>
+                      </View> */}
                     </View>
                   </View>
                 </View>

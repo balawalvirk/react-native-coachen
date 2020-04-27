@@ -13,7 +13,7 @@ import ApplicationStyles from "../../Themes/ApplicationStyles";
 import { totalSize, height, width } from "react-native-dimension";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { fonts } from "../../Themes/Fonts";
-
+import {getLessonsById} from "../../backend/user/Jobs";
 const tagList = [
   {
     type: "Music",
@@ -82,9 +82,29 @@ const profileList = [
 class Music extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      TypeData: '',
+      category:'',
+      type:'',
+      profileList:'',
+    };
+  }
+  async componentDidMount() {
+    
+    let data = await this.props.navigation.getParam("item");
+    let getLessons = await getLessonsById(data.coach_id); 
+    await this.setState({
+      TypeData: data,
+      category:data.category,
+      type:data.type,
+      profileList:getLessons,
+
+    });
+  
+    console.log("ProfileList",this.state.profileList);
   }
 
+  
   static navigationOptions = ({ navigation }) => {
     return {
       headerTitle: "Music",
@@ -164,7 +184,7 @@ class Music extends Component {
                 ]}
               >
                 <Image
-                  source={require("../../Images/dummy_profile_pic.jpg")}
+                  source={{uri: this.state.TypeData.profile_photo}}
                   style={[
                     Platform.OS == "ios"
                       ? ApplicationStyles.profilepictureStyleIos
@@ -194,7 +214,7 @@ class Music extends Component {
                             }
                           ]}
                         >
-                          Mille Knudsen
+                          {this.state.TypeData.name}
                         </Text>
 
                         <Icon name={"star"} color={colors.star} size={22} />
@@ -210,10 +230,12 @@ class Music extends Component {
                             }
                           ]}
                         >
-                          4.5
+                          {this.state.TypeData.rating}
                         </Text>
 
-                        <View
+                        <TouchableOpacity onPress={() =>
+                        this.props.navigation.navigate("Chat", { item:this.state.TypeData.coach_id })
+                      }
                           style={{
                             backgroundColor: colors.Blue,
                             width:
@@ -234,7 +256,7 @@ class Music extends Component {
                           }}
                         >
                           <Image
-                            source={require("../../Images/message.png")}
+                            source={require('../../Images/message.png')}
                             style={[
                               {
                                 // resizeMode: "center",
@@ -251,15 +273,32 @@ class Music extends Component {
                             ]}
                             tintColor={colors.snow}
                           />
-                        </View>
-
-                        <Icon
-                          name={"heart"}
-                          color={colors.skyBlue}
-                          size={22}
-                          // style={{ marginLeft: totalSize(1) }}
-                        />
+                        </TouchableOpacity>
+                        {this.state.TypeData.fav_count ? (
+                          <Icon
+                            name={"heart"}
+                            color={colors.lightBlue}
+                            size={22}
+                            style={{
+                              marginBottom: totalSize(0),
+                              marginRight: totalSize(0.5)
+                              // marginLeft:  totalSize(2)
+                            }}
+                          />
+                        ) : (
+                          <Icon
+                            name={"heart-o"}
+                            color={colors.lightBlue}
+                            size={22}
+                            style={{
+                              marginBottom: totalSize(0),
+                              marginRight: totalSize(0.5)
+                              // marginLeft:  totalSize(2)
+                            }}
+                          />
+                        )}
                       </View>
+                      <View>
                       <Text
                         style={[
                           ApplicationStyles.h5,
@@ -271,8 +310,9 @@ class Music extends Component {
                           }
                         ]}
                       >
-                        Vocal Coach
+                       {this.state.category!=null ?(this.state.category.name):null} 
                       </Text>
+                    </View>
                     </View>
                   </View>
                   <View
@@ -284,11 +324,10 @@ class Music extends Component {
                       }
                     ]}
                   >
-                    {tagList.map((item, key) => {
-                      return (
+                    
                         <View
                           style={{
-                            backgroundColor: item.color,
+                            backgroundColor: this.state.type!=null? this.state.type.color:null,
                             width: width(15),
                             marginHorizontal: totalSize(1),
                             marginVertical: totalSize(0.35),
@@ -296,7 +335,7 @@ class Music extends Component {
                             justifyContent: "center",
                             alignItems: "center"
                           }}
-                          key={key}
+                          
                         >
                           <Text
                             style={[
@@ -309,11 +348,10 @@ class Music extends Component {
                               }
                             ]}
                           >
-                            {item.type}
+                            {this.state.type!=null? this.state.type.name:null}
                           </Text>
                         </View>
-                      );
-                    })}
+                    
                   </View>
                 </View>
               </View>
@@ -351,9 +389,7 @@ class Music extends Component {
                   }
                 ]}
               >
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has been the industry's standard dummy
-                text.
+                {this.state.TypeData.about}
               </Text>
               <Text
                 style={[
@@ -381,7 +417,7 @@ class Music extends Component {
                   }
                 ]}
               >
-                Educated vocal coach.
+                {this.state.TypeData.background}
               </Text>
               <Text
                 style={[
@@ -435,9 +471,10 @@ class Music extends Component {
                 marginBottom: totalSize(3)
               }}
             >
-              {profileList.map((item, key) => {
+              {this.state.profileList.length?(
+             this.state.profileList.map((item, key) => {
                 return (
-                  <TouchableOpacity
+                  <TouchableOpacity onPress={()=>this.props.navigation.navigate("Booking")}
                     key={key}
                     style={[
                       ApplicationStyles.row,
@@ -468,7 +505,7 @@ class Music extends Component {
                           }
                         ]}
                       >
-                        {item.type}
+                        {item.title}
                       </Text>
                       <Text
                         style={[
@@ -484,7 +521,7 @@ class Music extends Component {
                           }
                         ]}
                       >
-                        {item.value}
+                        {item.description}
                       </Text>
 
                       <View
@@ -505,7 +542,7 @@ class Music extends Component {
                             }
                           ]}
                         >
-                          {item.rating}
+                          {item.fav_count>0?item.fav_count:0}{"  "}
                         </Text>
                         <View
                           style={{
@@ -525,7 +562,19 @@ class Music extends Component {
                               }
                             ]}
                           >
-                            {item.genere}
+                            {item.category?item.category.name:null} {"       "}
+                          </Text>
+                          
+                          <Text
+                            style={[
+                              ApplicationStyles.h4,
+                              {
+                                fontWeight: "normal",
+                                color: colors.darkPurple
+                              }
+                            ]}
+                          >
+                            {item.type?item.type.name:null } {"   "} {item.type?item.type.description:null}
                           </Text>
                           <Text
                             style={[
@@ -536,14 +585,16 @@ class Music extends Component {
                               }
                             ]}
                           >
-                            {item.genereDetail}
+                            {"    Price$"}{item.price}
                           </Text>
                         </View>
                       </View>
                     </View>
                   </TouchableOpacity>
                 );
-              })}
+              })
+            
+              ):(<Text>No Lessons Availbe </Text>)}
             </View>
           </View>
         </ScrollView>
